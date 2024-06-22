@@ -37,16 +37,16 @@ class ZAutoBroadcast : JavaPlugin() {
         logger.info("ZAutoBroadcast has begun enabling.")
 
         setupBStats()
+        setupMiniPlaceholders()
+        setupPAPI()
 
         val mainCommand = MainCommand(this)
         getCommand("zab")?.setExecutor(mainCommand)
         getCommand("zab")?.setTabCompleter(mainCommand)
 
-        setupMiniPlaceholders()
-        setupPAPI()
-
         autoBroadcasts = ConcurrentHashMap()
         forcedBroadcasts = ConcurrentHashMap()
+
         reloadConfigs(true) // Reloads the broadcasts/interval and also initialises the broadcast schedule with new interval
 
         logger.info("ZAutoBroadcast has finished enabling.")
