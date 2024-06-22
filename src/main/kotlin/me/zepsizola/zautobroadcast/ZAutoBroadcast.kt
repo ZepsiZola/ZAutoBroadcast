@@ -1,10 +1,13 @@
 package me.zepsizola.zautobroadcast
 
+//import me.zepsizola.zautobroadcast.bstats.bukkit.Metrics
 import com.tcoded.folialib.FoliaLib
 import com.tcoded.folialib.wrapper.task.WrappedTask
+import io.github.miniplaceholders.api.MiniPlaceholders
 import me.clip.placeholderapi.PlaceholderAPI
+import me.zepsizola.zautobroadcast.command.MainCommand
 import net.kyori.adventure.text.minimessage.MiniMessage
-//import me.zepsizola.zautobroadcast.bstats.bukkit.Metrics
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver.resolver
 import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
@@ -14,9 +17,6 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
-import io.github.miniplaceholders.api.MiniPlaceholders;
-import me.zepsizola.zautobroadcast.command.MainCommand
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver.resolver
 
 
 class ZAutoBroadcast : JavaPlugin() {
@@ -36,8 +36,7 @@ class ZAutoBroadcast : JavaPlugin() {
     override fun onEnable() {
         logger.info("ZAutoBroadcast has begun enabling.")
 
-        // Initialize bStats
-        val metrics = Metrics(this, 22351)
+        setupBStats()
 
         val mainCommand = MainCommand(this)
         getCommand("zab")?.setExecutor(mainCommand)
@@ -57,6 +56,12 @@ class ZAutoBroadcast : JavaPlugin() {
         logger.info("ZAutoBroadcast disabling...")
         broadcastTask?.cancel() // Cancels broadcasts.
         logger.info("ZAutoBroadcast has finished disabling.")
+    }
+
+    private fun setupBStats() {
+        // Initialize bStats
+        val pluginId = 22351
+        val metrics = Metrics(this, pluginId)
     }
 
     private fun setupPAPI() {
