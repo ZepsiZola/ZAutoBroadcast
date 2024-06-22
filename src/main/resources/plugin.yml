@@ -1,0 +1,23 @@
+name: ZAutoBroadcast
+version: '${version}'
+main: me.zepsizola.zautobroadcast.ZAutoBroadcast
+api-version: '1.20'
+folia-supported: true
+softdepend: [PlaceholderAPI]
+loadbefore: [PlaceholderAPI]
+
+commands:
+  zab:
+    description: Main command for ZAutoBroadcast.
+    usage: /<command> <subcommand> [arguments]
+    aliases: [zautobroadcast, autobroadcast]
+    subcommands:
+      reload:
+        description: Reloads the broadcasts.yml file.
+        usage: /<command> reload
+      broadcast:
+        description: Broadcasts a message with the given key.
+        usage: /<command> broadcast <key>
+      interval:
+        description: Gets or sets the broadcast interval.
+        usage: /<command> interval get/set <seconds>

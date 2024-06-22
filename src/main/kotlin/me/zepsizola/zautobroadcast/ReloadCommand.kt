@@ -1,0 +1,18 @@
+package me.zepsizola.zautobroadcast
+
+import org.bukkit.command.Command
+import org.bukkit.command.CommandExecutor
+import org.bukkit.command.CommandSender
+
+class ReloadCommand(private val plugin: ZAutoBroadcast) : CommandExecutor {
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
+        if (!CommandUtils.hasPermission(sender,"zautobroadcast.admin")) {
+            return true
+        }
+        plugin.reloadConfigs(false)
+        sender.sendMessage("Configuration reloaded.")
+        return true
+    }
+
+}

@@ -1,0 +1,82 @@
+#  ______              _        ____                      _               _
+# |___  /   /\        | |      |  _ \                    | |             | |
+#    / /   /  \  _   _| |_ ___ | |_) |_ __ ___   __ _  __| | ___ __ _ ___| |_
+#   / /   / /\ \| | | | __/ _ \|  _ <| '__/ _ \ / _` |/ _` |/ __/ _` / __| __|
+#  / /__ / ____ \ |_| | || (_) | |_) | | | (_) | (_| | (_| | (_| (_| \__ \ |_
+# /_____/_/    \_\__,_|\__\___/|____/|_|  \___/ \__,_|\__,_|\___\__,_|___/\__|
+#
+# This file is used to configure the broadcasts that are sent to the players.
+
+# The messages use MiniMessage format and any PlaceholderAPI placeholders.
+# Refer to https://docs.advntr.dev/minimessage/format.html for more information on MiniMessage format.
+
+##### IMPORTANT ##### MUST READ #####
+# There is no use of & for color codes, instead, use <color>.
+# You need to have the PlaceholderAPI plugin installed for the placeholders to work.
+##### IMPORTANT ##### MUST READ #####
+
+# The "weight" field defines how often the broadcast will show.
+# For example, if one broadcast has a weight of 10 while the others have a weight of 1, then that broadcast will appear 10 times as often as the others.
+
+# Feel free to delete these example messages and add your own.
+auto-broadcasts:
+  First:
+    weight: 1
+    message:
+      - ""
+      - "<green>This is the <bold>first line</bold> of the <white>first <green>broadcast message."
+      - "<blue>This is the <italic>second line</italic> of the <red>first <blue>broadcast message."
+      - ""
+  Name_These_Whatever_You_Want:
+    weight: 2
+    message:
+      - ""
+      - "<red>This message appears <underlined>twice as much</underlined> as the other messages."
+      - "<yellow>This is the <obfuscated>second line</obfuscated> of the second broadcast message."
+      - ""
+  PlaceholderAPI: # Placeholders only work with PlaceholderAPI plugin installed.
+    weight: 1
+    message:
+      - ""
+      - "<pink>Welcome, <white>%player_name%<pink> to the server!"
+      - "<white>There are currently <yellow>%online%<white> players online."
+      - ""
+  HEX:
+    weight: 1
+    message:
+      - ""
+      - "<#CE8BFF>This line has a hex color code."
+      - ""
+  Gradients:
+    weight: 1
+    message:
+      - ""
+      - "<gradient:red:blue>This line has a gradient from red to blue."
+      - "<gradient:#FFC88B:#93D3FF>This line has a gradient between two hex values."
+      - ""
+  HoverText: # This message says "Use your mouse to hover over all the red text." with hover text over the words 'hover' and 'red'.
+    weight: 1
+    message:
+      - ""
+      - "<white>Use your mouse to <red><hover:show_text:'<blue>Cool right?'>hover</hover> <white>over all the <red><hover:show_text:'<yellow>I'm inside your walls.'>red</hover><white> text."
+      - ""
+  Links:
+    weight: 1
+    message:
+      - ""
+      - "<click:open_url:'https://store.vanillaeuropa.com/'><white>Click <red>here <white>to visit the <gradient:#FF6C6C:#FFFFFF>Vanilla</gradient><gradient:#FFFFFF:#5EFFF8>Europa</gradient> <yellow>SMP<white>."
+      - ""
+
+
+
+
+##### FORCED BROADCASTS #####
+# Broadcasts that can only be run via command.
+# e.g. "/zab broadcast Notch"
+forced-broadcasts:
+  Forced:
+    message:
+      - "<white>This is a forced broadcast."
+  Notch:
+    message:
+      - "<yellow>Notch joined the game"
