@@ -32,6 +32,9 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.11.6'
     implementation "com.tcoded:FoliaLib:0.3.4"
     implementation("org.bstats:bstats-bukkit:3.0.2")
+    compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.2.3")
+    compileOnly("io.github.miniplaceholders:miniplaceholders-kotlin-ext:2.2.3")
+
 }
 
 shadowJar {

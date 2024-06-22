@@ -3,8 +3,8 @@ version: '${version}'
 main: me.zepsizola.zautobroadcast.ZAutoBroadcast
 api-version: '1.20'
 folia-supported: true
-softdepend: [PlaceholderAPI]
-loadbefore: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, MiniPlaceholders]
+loadbefore: [PlaceholderAPI, MiniPlaceholders]
 
 commands:
   zab:

@@ -1,28 +1,38 @@
 package me.zepsizola.zautobroadcast
 
-import org.bstats.bukkit.Metrics
 import com.tcoded.folialib.FoliaLib
 import com.tcoded.folialib.wrapper.task.WrappedTask
+import me.clip.placeholderapi.PlaceholderAPI
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
+import io.github.miniplaceholders.api.MiniPlaceholders;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver.resolver
+
 
 class ZAutoBroadcast : JavaPlugin() {
 
-    private lateinit var autoBroadcasts: ConcurrentHashMap<String, List<Component>>
-    lateinit var forcedBroadcasts: ConcurrentHashMap<String, List<Component>>
+    private lateinit var autoBroadcasts: ConcurrentHashMap<String, List<String>>
+    private lateinit var forcedBroadcasts: ConcurrentHashMap<String, List<String>>
     private lateinit var weightedKeys: List<String>
-    var interval: Long = 300 // Default value (300 seconds is 5 minutes)
+    private var interval: Long = 300 // Default value (300 seconds is 5 minutes)
     private var papiEnabled = false
+    private var miniPlaceholdersEnabled = false
     private var broadcastTask: WrappedTask? = null
-    val foliaLib = FoliaLib(this)
 
+    internal companion object { const val ADMIN_PERMISSION = "zautobroadcast.admin" }
+
+    val foliaLib = FoliaLib(this)
 
     override fun onEnable() {
         logger.info("ZAutoBroadcast has begun enabling.")
@@ -33,7 +43,8 @@ class ZAutoBroadcast : JavaPlugin() {
         val mainCommand = MainCommand(this)
         getCommand("zab")?.setExecutor(mainCommand)
         getCommand("zab")?.setTabCompleter(mainCommand)
-        setupPAPI()
+
+        if (!setupMiniPlaceholders()){ setupPAPI() } //Checks if MiniPlaceholder is available, if not, checks if PAPI is available. This plugin prefers MiniPlaceholder over PlaceholderAPI.
 
         autoBroadcasts = ConcurrentHashMap()
         forcedBroadcasts = ConcurrentHashMap()
@@ -48,13 +59,27 @@ class ZAutoBroadcast : JavaPlugin() {
         logger.info("ZAutoBroadcast has finished disabling.")
     }
 
-    private fun setupPAPI() {
+    private fun setupPAPI(): Boolean {
         // Check if PlaceholderAPI is available
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             papiEnabled = true
             logger.info("PlaceholderAPI enabled.")
+            return true
         } else {
             logger.info("PlaceholderAPI not found. PAPI support disabled.")
+            return false
+        }
+    }
+    private fun setupMiniPlaceholders(): Boolean {
+        // Check if MiniPlaceholder is available
+        if (Bukkit.getPluginManager().getPlugin("MiniPlaceholders") != null) {
+            //val resolver = MiniPlaceholders.getGlobalPlaceholders();
+            miniPlaceholdersEnabled = true
+            logger.info("MiniPlaceholders enabled.")
+            return true
+        } else {
+            logger.info("MiniPlaceholders not found. MiniPlaceholders support disabled.")
+            return false
         }
     }
 
@@ -65,14 +90,40 @@ class ZAutoBroadcast : JavaPlugin() {
             // Get the list of messages associated with the key
             val messageList = autoBroadcasts[key]
             // If the list is not null, broadcast each message in the list
-            messageList?.forEach { Bukkit.getServer().sendMessage(it) }
+            broadcastMessage(messageList ?: return@Runnable)
         }, 1, interval, TimeUnit.SECONDS) // Runs every [interval] seconds.
     }
 
+    internal fun broadcastMessage(messageList: List<String>) {
+        if (papiEnabled) {
+            this.server.onlinePlayers.forEach { player: Player ->
+                messageList.forEach {
+                    val messageString = PlaceholderAPI.setPlaceholders(player, it)
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(messageString))
+                }
+            }
+        } else if (miniPlaceholdersEnabled) {
+            this.server.onlinePlayers.forEach { player: Player ->
+                val resolver = resolver(
+                    MiniPlaceholders.getGlobalPlaceholders(),
+                    MiniPlaceholders.getAudiencePlaceholders(player))
+                messageList.forEach {
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(it, resolver))
+                }
+            }
+        } else {
+            this.server.onlinePlayers.forEach { player: Player ->
+                messageList.forEach {
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(it))
+                }
+            }
+        }
+    }
+
     @Synchronized
-    fun reloadConfigs(isStartup: Boolean) {
+    internal fun reloadConfigs(isStartup: Boolean) {
         // Clear the current messages
-        if(!isStartup){
+        if (!isStartup) {
             autoBroadcasts.clear()
             forcedBroadcasts.clear()
             broadcastTask?.cancel()
@@ -85,12 +136,8 @@ class ZAutoBroadcast : JavaPlugin() {
         // Parse the messages from the broadcasts.yml file
         val broadcasts = YamlConfiguration.loadConfiguration(broadcastFile)
 
-        // COMPLICATED PIECE OF CODE
-        // Basically takes the broadcast.yml configuration and converts each configured message to be in a Map<String, List<Component>> while also turning the message into a Component.
-        autoBroadcasts.putAll(broadcasts.getConfigurationSection("auto-broadcasts")?.getKeys(false)?.associateWith { key -> broadcasts.getStringList("auto-broadcasts.$key.message").map { MiniMessage.miniMessage().deserialize(it) } } ?: emptyMap())
-
-        // Does the same with forced broadcasts.
-        forcedBroadcasts.putAll(broadcasts.getConfigurationSection("forced-broadcasts")?.getKeys(false)?.associateWith { key -> broadcasts.getStringList("forced-broadcasts.$key.message").map { MiniMessage.miniMessage().deserialize(it) } } ?: emptyMap())
+        populateBroadcastsMap(autoBroadcasts, "auto-broadcasts", broadcastFile)
+        populateBroadcastsMap(forcedBroadcasts, "forced-broadcasts", broadcastFile)
 
         // Create the weighted list of keys
         weightedKeys = mutableListOf<String>().apply {
@@ -110,8 +157,18 @@ class ZAutoBroadcast : JavaPlugin() {
         startBroadcastTask()
     }
 
-    fun getBroadcastMessage(key: String): List<Component>? {
-        return forcedBroadcasts[key]
+    internal fun getInterval(): Long {
+        return interval
+    }
+
+    internal fun getForcedBroadcasts(): ConcurrentHashMap<String, List<String>> {
+        return forcedBroadcasts
+    }
+
+
+    private fun populateBroadcastsMap(map: ConcurrentHashMap<String, List<String>>, section: String, broadcastFile: File) {
+        val broadcasts = YamlConfiguration.loadConfiguration(broadcastFile)
+        map.putAll(broadcasts.getConfigurationSection(section)?.getKeys(false)?.associateWith { key -> broadcasts.getStringList("$section.$key.message").map { it } } ?: emptyMap())
     }
 
 }

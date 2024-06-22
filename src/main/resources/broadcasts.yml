@@ -34,12 +34,19 @@ auto-broadcasts:
       - "<red>This message appears <underlined>twice as much</underlined> as the other messages."
       - "<yellow>This is the <obfuscated>second line</obfuscated> of the second broadcast message."
       - ""
-  PlaceholderAPI: # Placeholders only work with PlaceholderAPI plugin installed.
+  PlaceholderAPI: # PlaceholderAPIs only work with PlaceholderAPI plugin installed.
     weight: 1
     message:
       - ""
-      - "<pink>Welcome, <white>%player_name%<pink> to the server!"
+      - "<light_purple>Welcome <white>%player_name%<light_purple> to the server!"
       - "<white>There are currently <yellow>%online%<white> players online."
+      - ""
+  MiniPlaceholders: # MiniPlaceholders only work with MiniPlaceholders plugin installed.
+    weight: 1
+    message:
+      - ""
+      - "<light_purple>Welcome <white><player_name><light_purple> to the server!"
+      - "<white>There are currently <yellow><server_online><white> players online."
       - ""
   HEX:
     weight: 1

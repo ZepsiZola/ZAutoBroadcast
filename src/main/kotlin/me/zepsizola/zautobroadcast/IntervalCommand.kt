@@ -6,14 +6,14 @@ import org.bukkit.command.CommandSender
 
 class IntervalCommand(private val plugin: ZAutoBroadcast) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (!CommandUtils.hasPermission(sender, "zautobroadcast.admin")) {
+        if (!CommandUtils.hasPermission(sender, ZAutoBroadcast.ADMIN_PERMISSION)) {
             return true
         }
         if (args.isEmpty()) {
-            sender.sendMessage("The current interval is ${plugin.interval} seconds.")
+            sender.sendMessage("The current interval is ${plugin.getInterval()} seconds.")
             return true
         } else if (args[0].equals("get", ignoreCase = true)) {
-            sender.sendMessage("The current interval is ${plugin.interval} seconds.")
+            sender.sendMessage("The current interval is ${plugin.getInterval()} seconds.")
         } else if (args[0].equals("set", ignoreCase = true)) {
             if (args.size < 2) {
                 sender.sendMessage("Please provide the new interval in seconds.")

@@ -29,7 +29,7 @@ class MainCommand(private val plugin: ZAutoBroadcast) : CommandExecutor, TabComp
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): MutableList<String>? {
         return when {
             args.size == 1 -> mutableListOf("reload", "broadcast", "interval", "custom")
-            args.size == 2 && args[0].equals("broadcast", ignoreCase = true) -> plugin.forcedBroadcasts.keys.toMutableList()
+            args.size == 2 && args[0].equals("broadcast", ignoreCase = true) -> plugin.getForcedBroadcasts().keys.toMutableList()
             args.size == 2 && args[0].equals("interval", ignoreCase = true) -> mutableListOf("get", "set")
             else -> null
         }

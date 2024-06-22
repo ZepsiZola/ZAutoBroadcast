@@ -17,6 +17,13 @@ ZAutoBroadcast is a powerful and customizable broadcasting plugin for Minecraft 
 - `/zab custom <message>`: Broadcasts a custom message.
 - `/zab interval get/set <seconds>`: Gets or sets the broadcast interval.
 
+## Version Compatibility
+
+- Compatible with [**Folia**](https://github.com/PaperMC/Folia), a powerful library for Minecraft plugins.
+- Must be run on Paper or a Paper fork.
+- Requires Java 17 or higher.
+- Compatible with at least 1.20.4 and above.
+
 ## Installation
 
 1. Download the latest version of ZAutoBroadcast from the [releases page](https://github.com/Zepsi/ZAutoBroadcast/releases).
