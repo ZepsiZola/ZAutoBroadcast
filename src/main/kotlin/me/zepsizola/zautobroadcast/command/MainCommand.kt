@@ -1,5 +1,6 @@
-package me.zepsizola.zautobroadcast
+package me.zepsizola.zautobroadcast.command
 
+import me.zepsizola.zautobroadcast.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender

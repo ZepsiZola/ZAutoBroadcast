@@ -1,12 +1,13 @@
-package me.zepsizola.zautobroadcast
+package me.zepsizola.zautobroadcast.command
 
+import me.zepsizola.zautobroadcast.ZAutoBroadcast
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 class BroadcastCommand(private val plugin: ZAutoBroadcast) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (!CommandUtils.hasPermission(sender,ZAutoBroadcast.ADMIN_PERMISSION)) {
+        if (!CommandUtils.hasPermission(sender, ZAutoBroadcast.ADMIN_PERMISSION)) {
             return true
         }
         if (args.isEmpty()) {
