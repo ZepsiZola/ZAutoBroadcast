@@ -21,3 +21,6 @@ commands:
       interval:
         description: Gets or sets the broadcast interval.
         usage: /<command> interval get/set <seconds>
+      custom:
+        description: Sends a custom broadcast message.
+        usage: /<command> custom <text>

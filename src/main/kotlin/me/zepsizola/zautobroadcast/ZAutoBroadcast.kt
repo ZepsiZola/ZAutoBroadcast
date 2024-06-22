@@ -3,10 +3,7 @@ package me.zepsizola.zautobroadcast
 import com.tcoded.folialib.FoliaLib
 import com.tcoded.folialib.wrapper.task.WrappedTask
 import me.clip.placeholderapi.PlaceholderAPI
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
@@ -32,7 +29,7 @@ class ZAutoBroadcast : JavaPlugin() {
 
     internal companion object { const val ADMIN_PERMISSION = "zautobroadcast.admin" }
 
-    val foliaLib = FoliaLib(this)
+    internal val foliaLib = FoliaLib(this)
 
     override fun onEnable() {
         logger.info("ZAutoBroadcast has begun enabling.")
@@ -44,7 +41,8 @@ class ZAutoBroadcast : JavaPlugin() {
         getCommand("zab")?.setExecutor(mainCommand)
         getCommand("zab")?.setTabCompleter(mainCommand)
 
-        if (!setupMiniPlaceholders()){ setupPAPI() } //Checks if MiniPlaceholder is available, if not, checks if PAPI is available. This plugin prefers MiniPlaceholder over PlaceholderAPI.
+        setupMiniPlaceholders()
+        setupPAPI()
 
         autoBroadcasts = ConcurrentHashMap()
         forcedBroadcasts = ConcurrentHashMap()
@@ -59,27 +57,20 @@ class ZAutoBroadcast : JavaPlugin() {
         logger.info("ZAutoBroadcast has finished disabling.")
     }
 
-    private fun setupPAPI(): Boolean {
-        // Check if PlaceholderAPI is available
+    private fun setupPAPI() {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             papiEnabled = true
             logger.info("PlaceholderAPI enabled.")
-            return true
         } else {
             logger.info("PlaceholderAPI not found. PAPI support disabled.")
-            return false
         }
     }
-    private fun setupMiniPlaceholders(): Boolean {
-        // Check if MiniPlaceholder is available
+    private fun setupMiniPlaceholders() {
         if (Bukkit.getPluginManager().getPlugin("MiniPlaceholders") != null) {
-            //val resolver = MiniPlaceholders.getGlobalPlaceholders();
             miniPlaceholdersEnabled = true
             logger.info("MiniPlaceholders enabled.")
-            return true
         } else {
             logger.info("MiniPlaceholders not found. MiniPlaceholders support disabled.")
-            return false
         }
     }
 
@@ -92,6 +83,11 @@ class ZAutoBroadcast : JavaPlugin() {
             // If the list is not null, broadcast each message in the list
             broadcastMessage(messageList ?: return@Runnable)
         }, 1, interval, TimeUnit.SECONDS) // Runs every [interval] seconds.
+    }
+
+    private fun populateBroadcastsMap(map: ConcurrentHashMap<String, List<String>>, section: String, broadcastFile: File) {
+        val broadcasts = YamlConfiguration.loadConfiguration(broadcastFile)
+        map.putAll(broadcasts.getConfigurationSection(section)?.getKeys(false)?.associateWith { key -> broadcasts.getStringList("$section.$key.message").map { it } } ?: emptyMap())
     }
 
     internal fun broadcastMessage(messageList: List<String>) {
@@ -165,10 +161,5 @@ class ZAutoBroadcast : JavaPlugin() {
         return forcedBroadcasts
     }
 
-
-    private fun populateBroadcastsMap(map: ConcurrentHashMap<String, List<String>>, section: String, broadcastFile: File) {
-        val broadcasts = YamlConfiguration.loadConfiguration(broadcastFile)
-        map.putAll(broadcasts.getConfigurationSection(section)?.getKeys(false)?.associateWith { key -> broadcasts.getStringList("$section.$key.message").map { it } } ?: emptyMap())
-    }
 
 }

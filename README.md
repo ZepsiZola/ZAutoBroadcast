@@ -7,8 +7,10 @@ ZAutoBroadcast is a powerful and customizable broadcasting plugin for Minecraft 
 - **Automatic Broadcasts**: Set up automatic broadcasts that are sent to all players on the server at a configurable interval.
 - **Forced Broadcasts**: Set up forced broadcasts that can only be run via command.
 - **Weighted Broadcasts**: Control how often each broadcast is shown with the "weight" field. Broadcasts with a higher weight will appear more often.
-- **MiniMessage Support**: The messages use MiniMessage format, allowing for rich text formatting and color codes.
-- **PlaceholderAPI Support**: Use any PlaceholderAPI placeholders in your messages. (Requires the PlaceholderAPI plugin)
+- **[MiniMessage Support](https://docs.advntr.dev/minimessage/format.html)**: The messages use MiniMessage format, allowing for rich text formatting and color codes.
+- **PlaceholderAPI Support**: Use any PlaceholderAPI placeholders in your messages. (Requires the [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI) plugin)
+- **MiniPlaceholders Support**: Use any MiniPlaceholder placeholders in your messages. (Requires the [MiniPlaceholders](https://github.com/MiniPlaceholders/MiniPlaceholders/) plugin)
+
 
 ## Commands
 
@@ -16,6 +18,7 @@ ZAutoBroadcast is a powerful and customizable broadcasting plugin for Minecraft 
 - `/zab broadcast <key>`: Broadcasts a message with the given key.
 - `/zab custom <message>`: Broadcasts a custom message.
 - `/zab interval get/set <seconds>`: Gets or sets the broadcast interval.
+- All commands require the `zautobroadcast.admin` permission.
 
 ## Version Compatibility
 
