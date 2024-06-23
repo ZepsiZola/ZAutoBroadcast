@@ -27,7 +27,7 @@ Powerful and customizable AutoBroadcaster/AutoAnnouncer plugin for Minecraft ser
 - Compatible with [**Folia**](https://github.com/PaperMC/Folia), a powerful library for Minecraft plugins.
 - Must be run on Paper or a Paper fork.
 - Requires Java 17 or higher.
-- Compatible with at least 1.20.4 and above.
+- Compatible with at least 1.20 and above.
 
 ## Installation
 
