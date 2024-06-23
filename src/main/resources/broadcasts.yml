@@ -46,7 +46,7 @@ auto-broadcasts:
     weight: 1
     message:
       - ""
-      - "<light_purple>Your name is<white>%player_name%<light_purple> and there are %online% players online!"
+      - "<light_purple>Your name is <white>%player_name%<light_purple> and there are %online% players online!"
       - "<white>PAPI placeholders only work when PlaceholderAPI is installed."
       - ""
 
@@ -54,7 +54,7 @@ auto-broadcasts:
     weight: 1
     message:
       - ""
-      - "<light_purple>Your name is<white><player_name><light_purple> and there are <yellow><server_online><light_purple> players online!"
+      - "<light_purple>Your name is <white><player_name><light_purple> and there are <yellow><server_online><light_purple> players online!"
       - "<white>MiniPlaceholders only work when MiniPlaceholders is installed."
       - ""
 
