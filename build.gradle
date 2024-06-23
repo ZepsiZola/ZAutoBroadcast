@@ -6,6 +6,7 @@ plugins {
 
 group = 'me.zepsizola'
 version = '1.1'
+def projectName = 'ZAutoBroadcast'
 
 repositories {
     mavenCentral()
@@ -41,7 +42,7 @@ dependencies {
 shadowJar {
     relocate('org.bstats', 'me.zepsizola.zautobroadcast.bstats')
     relocate('com.tcoded', 'me.zepsizola.zautobroadcast.FoliaLib')
-    archiveBaseName.set('ZAutoBroadcast')
+    archiveBaseName.set(projectName)
     archiveVersion.set(version)
     archiveClassifier.set('')
     //configurations = [project.configurations.runtimeClasspath]
