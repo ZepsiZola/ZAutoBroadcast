@@ -1,6 +1,8 @@
 # ZAutoBroadcast
 
-ZAutoBroadcast is a powerful and customizable broadcasting plugin for Minecraft servers. It allows server administrators to set up automatic and forced broadcasts with a variety of features, including support for MiniMessage format and PlaceholderAPI placeholders.
+Powerful and customizable AutoBroadcaster/AutoAnnouncer plugin for Minecraft servers. It allows server administrators to set up automatic and forced broadcasts with a variety of features, including support for MiniMessage format, MiniPlaceholders. and PlaceholderAPI placeholders.
+
+## Folia Supported ✔️
 
 ## Features
 
