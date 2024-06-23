@@ -2,6 +2,8 @@
 
 Powerful and customizable AutoBroadcaster/AutoAnnouncer plugin for Minecraft servers. It allows server administrators to set up automatic and forced broadcasts with a variety of features, including support for MiniMessage format, MiniPlaceholders. and PlaceholderAPI placeholders.
 
+## Folia Supported ✔️
+
 ## Features
 
 - **Automatic Broadcasts**: Set up automatic broadcasts that are sent to all players on the server at a configurable interval.
