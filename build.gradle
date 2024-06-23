@@ -41,6 +41,9 @@ dependencies {
 shadowJar {
     relocate('org.bstats', 'me.zepsizola.zautobroadcast.bstats')
     relocate('com.tcoded', 'me.zepsizola.zautobroadcast.FoliaLib')
+    archiveBaseName.set('ZAutoBroadcast')
+    archiveVersion.set(version)
+    archiveClassifier.set('')
     //configurations = [project.configurations.runtimeClasspath]
 }
 
