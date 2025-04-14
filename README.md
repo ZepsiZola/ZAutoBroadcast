@@ -29,12 +29,17 @@ Powerful and customizable AutoBroadcaster/AutoAnnouncer plugin for Minecraft ser
 - Requires Java 17 or higher.
 - Compatible with at least 1.20 and above.
 
+## Dependencies
+
+- [MCKotlin](https://modrinth.com/plugin/mckotlin)
+
 ## Installation
 
 1. Download the latest version of ZAutoBroadcast from the [releases page](https://github.com/Zepsi/ZAutoBroadcast/releases).
-2. Place the downloaded `.jar` file into your server's `plugins` folder.
-3. Restart your server.
-4. Configure the plugin to your liking by editing the `config.yml` and `broadcasts.yml` files in the `plugins/ZAutoBroadcast` folder.
+2. Download the appropriate version of MCKotlin from [Modrinth](https://modrinth.com/plugin/mckotlin)
+3. Place the downloaded `.jar` files into your server's `plugins` folder.
+4. Restart your server.
+5. Configure the plugin to your liking by editing the `config.yml` and `broadcasts.yml` files in the `plugins/ZAutoBroadcast` folder.
 
 ## Configuration
 
