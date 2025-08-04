@@ -89,7 +89,7 @@ class ZAutoBroadcast : JavaPlugin() {
             val messageList = autoBroadcasts[key]
             // If the list is not null, broadcast each message in the list
             broadcastMessage(messageList ?: return@Runnable)
-        }, 1, interval, TimeUnit.SECONDS) // Runs every [interval] seconds.
+        }, interval, interval, TimeUnit.SECONDS) // First run after one interval, then runs every [interval] seconds.
     }
 
     private fun populateBroadcastsMap(map: ConcurrentHashMap<String, List<String>>, section: String, broadcastFile: File) {
@@ -167,6 +167,5 @@ class ZAutoBroadcast : JavaPlugin() {
     internal fun getForcedBroadcasts(): ConcurrentHashMap<String, List<String>> {
         return forcedBroadcasts
     }
-
 
 }
