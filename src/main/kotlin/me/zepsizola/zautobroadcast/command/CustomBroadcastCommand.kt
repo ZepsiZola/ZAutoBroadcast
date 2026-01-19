@@ -16,7 +16,7 @@ class CustomBroadcastCommand(private val plugin: ZAutoBroadcast) : CommandExecut
             return true
         }
         val message = List(1) { args.joinToString(" ")}
-        plugin.foliaLib.impl.runNextTick { plugin.broadcastMessage(message) }
+        plugin.foliaLib.impl.runNextTick { plugin.broadcastMessage("null", message) }
         return true
     }
 }

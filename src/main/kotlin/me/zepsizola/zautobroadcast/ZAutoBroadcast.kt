@@ -29,7 +29,10 @@ class ZAutoBroadcast : JavaPlugin() {
     private var miniPlaceholdersEnabled = false
     private var broadcastTask: WrappedTask? = null
 
-    internal companion object { const val ADMIN_PERMISSION = "zautobroadcast.admin" }
+    internal companion object { 
+        const val ADMIN_PERMISSION = "zautobroadcast.admin"
+        const val IGNORE_PERMISSION = "zautobroadcast.ignore"
+    }
 
     internal val foliaLib = FoliaLib(this)
 
@@ -86,9 +89,9 @@ class ZAutoBroadcast : JavaPlugin() {
             // Randomly select a key from the weighted list of keys
             val key = weightedKeys[ThreadLocalRandom.current().nextInt(weightedKeys.size)]
             // Get the list of messages associated with the key
-            val messageList = autoBroadcasts[key]
+            val broadcastText = autoBroadcasts[key]
             // If the list is not null, broadcast each message in the list
-            broadcastMessage(messageList ?: return@Runnable)
+            broadcastMessage(key, broadcastText ?: return@Runnable)
         }, interval, interval, TimeUnit.SECONDS) // First run after one interval, then runs every [interval] seconds.
     }
 
@@ -97,29 +100,35 @@ class ZAutoBroadcast : JavaPlugin() {
         map.putAll(broadcasts.getConfigurationSection(section)?.getKeys(false)?.associateWith { key -> broadcasts.getStringList("$section.$key.message").map { it } } ?: emptyMap())
     }
 
-    internal fun broadcastMessage(messageList: List<String>) {
+    internal fun broadcastMessage(key: String, broadcastText: List<String>) {
         if (papiEnabled) {
-            this.server.onlinePlayers.forEach { player: Player ->
-                messageList.forEach {
-                    val messageString = PlaceholderAPI.setPlaceholders(player, it)
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(messageString))
+            this.server.onlinePlayers
+                .filter { !it.hasPermission(IGNORE_PERMISSION) || !it.hasPermission("$IGNORE_PERMISSION.$key") }
+                .forEach { player: Player ->
+                    broadcastText.forEach {
+                        val messageString = PlaceholderAPI.setPlaceholders(player, it)
+                        player.sendMessage(MiniMessage.miniMessage().deserialize(messageString))
+                    }
                 }
-            }
         } else if (miniPlaceholdersEnabled) {
-            this.server.onlinePlayers.forEach { player: Player ->
-                val resolver = resolver(
-                    MiniPlaceholders.getGlobalPlaceholders(),
-                    MiniPlaceholders.getAudiencePlaceholders(player))
-                messageList.forEach {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(it, resolver))
+            this.server.onlinePlayers
+                .filter { !it.hasPermission(IGNORE_PERMISSION) || !it.hasPermission("$IGNORE_PERMISSION.$key") }
+                .forEach { player: Player ->
+                    val resolver = resolver(
+                        MiniPlaceholders.getGlobalPlaceholders(),
+                        MiniPlaceholders.getAudiencePlaceholders(player))
+                    broadcastText.forEach {
+                        player.sendMessage(MiniMessage.miniMessage().deserialize(it, resolver))
+                    }
                 }
-            }
         } else {
-            this.server.onlinePlayers.forEach { player: Player ->
-                messageList.forEach {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(it))
+            this.server.onlinePlayers
+                .filter { !it.hasPermission(IGNORE_PERMISSION) || !it.hasPermission("$IGNORE_PERMISSION.$key") }
+                .forEach { player: Player ->
+                    broadcastText.forEach {
+                        player.sendMessage(MiniMessage.miniMessage().deserialize(it))
+                    }
                 }
-            }
         }
     }
 

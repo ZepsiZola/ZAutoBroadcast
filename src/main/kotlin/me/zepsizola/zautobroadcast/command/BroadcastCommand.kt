@@ -20,7 +20,7 @@ class BroadcastCommand(private val plugin: ZAutoBroadcast) : CommandExecutor {
             sender.sendMessage("Invalid key for broadcast message.")
             return true
         }
-        plugin.foliaLib.impl.runNextTick { plugin.broadcastMessage(broadcast) }
+        plugin.foliaLib.impl.runNextTick { plugin.broadcastMessage(key, broadcast) }
         return true
     }
 }
