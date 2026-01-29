@@ -103,7 +103,7 @@ class ZAutoBroadcast : JavaPlugin() {
     internal fun broadcastMessage(key: String, broadcastText: List<String>) {
         if (papiEnabled) {
             this.server.onlinePlayers
-                .filter { !it.hasPermission(IGNORE_PERMISSION) || !it.hasPermission("$IGNORE_PERMISSION.$key") }
+                .filterNot { it.hasPermission(IGNORE_PERMISSION) || it.hasPermission("$IGNORE_PERMISSION.$key") }
                 .forEach { player: Player ->
                     broadcastText.forEach {
                         val messageString = PlaceholderAPI.setPlaceholders(player, it)
@@ -112,7 +112,7 @@ class ZAutoBroadcast : JavaPlugin() {
                 }
         } else if (miniPlaceholdersEnabled) {
             this.server.onlinePlayers
-                .filter { !it.hasPermission(IGNORE_PERMISSION) || !it.hasPermission("$IGNORE_PERMISSION.$key") }
+                .filterNot { it.hasPermission(IGNORE_PERMISSION) || it.hasPermission("$IGNORE_PERMISSION.$key") }
                 .forEach { player: Player ->
                     val resolver = resolver(
                         MiniPlaceholders.getGlobalPlaceholders(),
@@ -123,7 +123,7 @@ class ZAutoBroadcast : JavaPlugin() {
                 }
         } else {
             this.server.onlinePlayers
-                .filter { !it.hasPermission(IGNORE_PERMISSION) || !it.hasPermission("$IGNORE_PERMISSION.$key") }
+                .filterNot { it.hasPermission(IGNORE_PERMISSION) || it.hasPermission("$IGNORE_PERMISSION.$key") }
                 .forEach { player: Player ->
                     broadcastText.forEach {
                         player.sendMessage(MiniMessage.miniMessage().deserialize(it))
