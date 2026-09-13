@@ -1,5 +1,7 @@
 # Bossbar titles use MiniMessage: https://docs.advntr.dev/minimessage/format.html
 # Announce a preset to everyone with /zab bossbar preset <key>.
+# Stop its active bars with /zab bossbar stop <key>, or stop all active bars
+# with /zab bossbar stop all. Custom announcements can be stopped using their UUID.
 # Command-triggered announcements also reach players who join before they expire,
 # even when show_on_join is false. Their countdown does not restart for new viewers.
 # Reload preset definitions with /zab reload; active announcements keep their expiry.
@@ -7,9 +9,10 @@
 bossbars:
   purge:
     text: "<white>Do <red>/server purge <white>for the Purge Event"
-    duration: 10800 # Whole seconds. -1 shows indefinitely, until server shutdown.
+    duration: 10800 # Whole seconds. -1 shows until stopped or the server shuts down.
     # Automatically show this preset to each joining player for its full duration.
     # If this preset is already announced server-wide, show its remaining time instead.
+    # Stopping active bars still allows fresh automatic bars on future joins.
     show_on_join: false
     colour: white # Optional. pink, blue, red, green, yellow, purple, or white.
     notches: 10 # Optional. 0 (continuous), 6, 10, 12, or 20. Defaults to 0.

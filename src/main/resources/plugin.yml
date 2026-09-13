@@ -25,5 +25,5 @@ commands:
         description: Sends a custom broadcast message.
         usage: /<command> custom <text>
       bossbar:
-        description: Announces a custom bossbar or a preset from bossbar.yml.
-        usage: /<command> bossbar custom <target> <duration> <colour> <content> OR /<command> bossbar preset <key>
+        description: Announces custom or preset bossbars, or stops active bossbars.
+        usage: /<command> bossbar custom <target> <duration> <colour> <content> OR /<command> bossbar preset <key> OR /<command> bossbar stop <all|id>

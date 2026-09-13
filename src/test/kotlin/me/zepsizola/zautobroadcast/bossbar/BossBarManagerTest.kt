@@ -25,6 +25,8 @@ import java.util.logging.Logger
 import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class BossBarManagerTest {
@@ -145,14 +147,14 @@ class BossBarManagerTest {
         loadPreset(showOnJoin = false)
         val first = join()
         assertTrue(visible.getValue(first).isEmpty())
-        assertTrue(manager.announcePreset("purge"))
+        assertNotNull(manager.announcePreset("purge"))
         flush()
         assertEquals(BossBar.Overlay.NOTCHED_10, visible.getValue(first).single().overlay())
         advance(200)
         assertEquals(400f / 600f, visible.getValue(join()).single().progress(), 0.0001f)
         advance(400)
         assertTrue(visible.values.all { it.isEmpty() })
-        assertFalse(manager.announcePreset("missing"))
+        assertNull(manager.announcePreset("missing"))
     }
 
     @Test
@@ -215,6 +217,129 @@ class BossBarManagerTest {
         assertEquals(listOf("purge"), manager.presetKeys())
     }
 
+    @Test
+    fun `stopping one custom ID removes it from current and future viewers only`() {
+        val player = join()
+        val id = assertNotNull(manager.announce(definition(-1), null))
+        flush()
+        manager.announce(definition(600), null)
+        flush()
+        val remaining = visible.getValue(player).last()
+
+        assertEquals(1, manager.stop(id.toString().uppercase()))
+        flush()
+        assertEquals(setOf(remaining), visible.getValue(player))
+        assertFalse(id.toString() in manager.activeIds())
+        assertEquals(0, manager.stop(id.toString()))
+        advance(200)
+        val late = join()
+        assertEquals(400f / 600f, visible.getValue(late).single().progress(), 0.0001f)
+        assertEquals(400f / 600f, remaining.progress(), 0.0001f)
+    }
+
+    @Test
+    fun `stopping all clears visible and queued bars and allows new announcements`() {
+        loadPreset(showOnJoin = false)
+        val player = join()
+        join()
+        manager.announce(definition(-1), null)
+        manager.announce(definition(600), player.uniqueId)
+        manager.announcePreset("purge")
+        flush()
+        assertEquals(3, visible.getValue(player).size)
+
+        timer.run()
+        manager.announce(definition(600), null)
+        assertEquals(4, manager.stopAll())
+        flush()
+        assertTrue(visible.values.all { it.isEmpty() })
+        assertTrue(manager.activeIds().isEmpty())
+        assertTrue(visible.getValue(join()).isEmpty())
+
+        manager.announce(definition(1), null)
+        flush()
+        assertTrue(visible.values.all { it.size == 1 })
+        advance(1)
+        assertTrue(visible.values.all { it.isEmpty() })
+        verify(timerTask, never()).cancel()
+    }
+
+    @Test
+    fun `stopping an offline target prevents its bossbar from returning on reconnect`() {
+        val player = join()
+        val id = assertNotNull(manager.announce(definition(-1), player.uniqueId))
+        flush()
+        quit(player)
+        assertEquals(listOf(id.toString()), manager.activeIds())
+        assertEquals(1, manager.stop(id.toString()))
+        assertTrue(visible.getValue(join(player.uniqueId)).isEmpty())
+    }
+
+    @Test
+    fun `preset keys stop every active automatic copy and later joins create fresh copies`() {
+        loadPreset(showOnJoin = true)
+        val first = join()
+        val second = join()
+        val customId = assertNotNull(manager.announce(definition(-1), null))
+        flush()
+        assertEquals(listOf("purge", customId.toString()), manager.activeIds())
+
+        assertEquals(2, manager.stop("purge"))
+        flush()
+        assertEquals(1, visible.getValue(first).size)
+        assertEquals(1, visible.getValue(second).size)
+        assertEquals(listOf(customId.toString()), manager.activeIds())
+
+        val late = join()
+        assertEquals(2, visible.getValue(late).size)
+        assertEquals(1, manager.stop("purge"))
+        flush()
+        assertEquals(1, visible.getValue(late).size)
+    }
+
+    @Test
+    fun `commanded presets can be stopped by UUID or key even after their definition is removed`() {
+        loadPreset(showOnJoin = false)
+        val player = join()
+        val id = assertNotNull(manager.announcePreset("purge"))
+        flush()
+        assertEquals(1, manager.stop(id.toString()))
+        flush()
+        assertTrue(visible.getValue(player).isEmpty())
+        assertTrue(visible.getValue(join()).isEmpty())
+
+        manager.announcePreset("purge")
+        dataFolder.resolve("bossbar.yml").writeText("bossbars: {}")
+        manager.reloadPresets()
+        assertEquals(listOf("purge"), manager.activeIds())
+        assertEquals(1, manager.stop("purge"))
+        flush()
+        assertTrue(visible.values.all { it.isEmpty() })
+    }
+
+    @Test
+    fun `a preset named all is individually stoppable using its UUID`() {
+        loadPreset(showOnJoin = false, key = "all")
+        val id = assertNotNull(manager.announcePreset("all"))
+        assertEquals(listOf(id.toString()), manager.activeIds())
+        assertEquals(1, manager.stop(id.toString()))
+        assertTrue(visible.getValue(join()).isEmpty())
+    }
+
+    @Test
+    fun `expired and unknown IDs are not treated as active announcements`() {
+        val expired = assertNotNull(manager.announce(definition(1), null))
+        val active = assertNotNull(manager.announce(definition(-1), null))
+        now = TimeUnit.SECONDS.toNanos(2)
+        assertEquals(listOf(active.toString()), manager.activeIds())
+        assertEquals(0, manager.stop(expired.toString()))
+        assertEquals(0, manager.stop("missing"))
+        assertEquals(listOf(active.toString()), manager.activeIds())
+        assertEquals(1, manager.stopAll())
+        assertEquals(0, manager.stopAll())
+        assertTrue(visible.getValue(join()).isEmpty())
+    }
+
     private fun definition(duration: Long) = BossBarDefinition(Component.text("Announcement"), duration)
 
     private fun join(uuid: UUID = UUID.randomUUID()): Player {
@@ -260,10 +385,10 @@ class BossBarManagerTest {
         }
     }
 
-    private fun loadPreset(showOnJoin: Boolean, duration: Long = 600) {
+    private fun loadPreset(showOnJoin: Boolean, duration: Long = 600, key: String = "purge") {
         dataFolder.resolve("bossbar.yml").writeText("""
             bossbars:
-              purge:
+              $key:
                 text: "<white>Do <red>/server purge <white>for the Purge Event"
                 duration: $duration
                 show_on_join: $showOnJoin

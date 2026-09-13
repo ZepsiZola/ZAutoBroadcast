@@ -23,6 +23,7 @@ Powerful and customizable AutoBroadcaster/AutoAnnouncer plugin for Minecraft ser
 - `/zab interval get/set <seconds>`: Gets or sets the broadcast interval.
 - `/zab bossbar custom <target> <duration> <colour> <content>`: Announces a custom MiniMessage bossbar.
 - `/zab bossbar preset <key>`: Announces a preset from `bossbar.yml` to everyone.
+- `/zab bossbar stop <all|id>`: Stops all active bossbars, or those matching a preset key or announcement UUID.
 - All commands require the `zautobroadcast.admin` permission.
 
 ### Bossbars
@@ -32,14 +33,22 @@ Powerful and customizable AutoBroadcaster/AutoAnnouncer plugin for Minecraft ser
 /zab bossbar custom @a -1 purple <gradient:red:gold>Welcome to the server!</gradient>
 /zab bossbar custom PlayerName 60 blue <aqua>Hello, PlayerName!
 /zab bossbar preset purge
+/zab bossbar stop purge
+/zab bossbar stop all
 ```
 
 - **Target:** `all` or `@a` for everyone, or an online player's exact name. Player targets are tracked by UUID so they can reconnect and see the remaining duration.
-- **Duration:** A positive whole number of seconds, or `-1` to show until server shutdown. Timed bars count down from full to empty. Indefinite bars stay full.
+- **Duration:** A positive whole number of seconds, or `-1` to show until stopped or the server shuts down. Timed bars count down from full to empty. Indefinite bars stay full.
 - **Colour:** `pink`, `blue`, `red`, `green`, `yellow`, `purple`, or `white` (case-insensitive). This colours the bar itself; use MiniMessage to style the text.
 - **Content:** MiniMessage text, including spaces. No surrounding quotes are needed in commands.
 
-An announcement's lifetime starts when the command runs, even if nobody is online. For example, a player joining 200 seconds into a 600-second announcement sees the bar for the remaining 400 seconds. Joining does not restart or extend the announcement, and expired bars are not shown to new players. Active bars are kept in memory until they expire or the plugin stops.
+An announcement's lifetime starts when the command runs, even if nobody is online. For example, a player joining 200 seconds into a 600-second announcement sees the bar for the remaining 400 seconds. Joining does not restart or extend the announcement, and expired bars are not shown to new players. Active bars are kept in memory until they expire, are stopped, or the plugin stops.
+
+#### Stopping bossbars
+
+Custom and preset announcement commands report a UUID you can use with `/zab bossbar stop <id>`. Presets can also be stopped by their configuration key, such as `/zab bossbar stop purge`, which stops all active copies of that preset. `/zab bossbar stop all` stops every active bossbar, including indefinite bars and announcements with nobody currently online. Use tab completion after `/zab bossbar stop ` to find active IDs. A preset named `all` can be stopped individually using its UUID.
+
+Stopped announcements disappear from current viewers and are no longer shown to late joiners or reconnecting targets. New announcements can be started immediately. Presets configured with `show_on_join: true` create fresh automatic bars on future joins; to disable that automatic display, set `show_on_join: false` and run `/zab reload`.
 
 #### `bossbar.yml`
 
@@ -49,7 +58,7 @@ This file is created automatically in `plugins/ZAutoBroadcast/`:
 bossbars:
   purge:
     text: "<white>Do <red>/server purge <white>for the Purge Event"
-    duration: 10800 # Seconds; -1 means until server shutdown.
+    duration: 10800 # Seconds; -1 means until stopped or the server shuts down.
     show_on_join: false
     notches: 10
     colour: white # Optional; defaults to white.
@@ -95,7 +104,7 @@ sdk use java 17.0.20-tem
 ./gradlew clean build --no-daemon
 ```
 
-Kotlin compilation runs inside Gradle's JVM so it uses the selected JDK instead of reusing a Kotlin compiler daemon started under another Java version. The plugin JAR is written to `build/libs/ZAutoBroadcast-1.4.jar`.
+Kotlin compilation runs inside Gradle's JVM so it uses the selected JDK instead of reusing a Kotlin compiler daemon started under another Java version. The plugin JAR is written to `build/libs/ZAutoBroadcast-1.5.jar`.
 
 ## Support
 

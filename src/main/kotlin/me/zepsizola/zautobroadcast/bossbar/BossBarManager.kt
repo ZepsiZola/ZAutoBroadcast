@@ -70,24 +70,52 @@ internal class BossBarManager(
 
     fun presetKeys(): List<String> = synchronized(lock) { presets.keys.toList() }
 
-    fun announce(definition: BossBarDefinition, target: UUID?) {
-        synchronized(lock) {
-            if (stopped) return
+    fun activeIds(): List<String> = synchronized(lock) {
+        val now = nanoTime()
+        activeBars.values.filterNot { it.isExpired(now) }.map {
+            // "all" is reserved by the stop command; that preset can still use its UUID.
+            it.presetKey?.takeUnless { key -> key.equals("all", ignoreCase = true) } ?: it.id.toString()
+        }.distinct()
+    }
+
+    fun announce(definition: BossBarDefinition, target: UUID?): UUID? {
+        val id = synchronized(lock) {
+            if (stopped) return null
             addBar(definition, target)
         }
         refreshOnlinePlayers()
+        return id
     }
 
-    fun announcePreset(key: String): Boolean {
-        synchronized(lock) {
-            if (stopped) return false
-            val preset = presets[key] ?: return false
+    fun announcePreset(key: String): UUID? {
+        val id = synchronized(lock) {
+            if (stopped) return null
+            val preset = presets[key] ?: return null
             // Re-announcing a preset restarts it, replacing any automatic join copies too.
             activeBars.values.removeIf { it.presetKey == key }
             addBar(preset.definition, null, key)
         }
         refreshOnlinePlayers()
-        return true
+        return id
+    }
+
+    fun stopAll(): Int = stopMatching { true }
+
+    fun stop(id: String): Int = stopMatching {
+        it.presetKey == id || it.id.toString().equals(id, ignoreCase = true)
+    }
+
+    private fun stopMatching(matches: (ActiveBossBar) -> Boolean): Int {
+        val count = synchronized(lock) {
+            if (stopped) return 0
+            val now = nanoTime()
+            val matching = activeBars.values.filter(matches)
+            matching.forEach { activeBars.remove(it.id) }
+            matching.count { !it.isExpired(now) }
+        }
+        // Entity callbacks read the registry again, so queued shows cannot revive stopped bars.
+        refreshOnlinePlayers()
+        return count
     }
 
     @EventHandler
@@ -135,9 +163,10 @@ internal class BossBarManager(
         target: UUID?,
         presetKey: String? = null,
         automatic: Boolean = false
-    ) {
+    ): UUID {
         val id = UUID.randomUUID()
         activeBars[id] = ActiveBossBar(id, definition, target, nanoTime(), presetKey, automatic)
+        return id
     }
 
     private fun tick() {

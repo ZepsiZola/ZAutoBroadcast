@@ -17,15 +17,20 @@ class BossBarCommand(private val plugin: ZAutoBroadcast) : CommandExecutor, TabC
             "preset" -> {
                 if (args.size != 2) {
                     sender.sendMessage("Usage: /$label bossbar preset <key>")
-                } else if (plugin.bossBarManager.announcePreset(args[1])) {
-                    sender.sendMessage("Bossbar preset '${args[1]}' announced to all players.")
                 } else {
-                    sender.sendMessage("Unknown bossbar preset '${args[1]}'. Check bossbar.yml and use /$label reload.")
+                    val id = plugin.bossBarManager.announcePreset(args[1])
+                    if (id != null) {
+                        sender.sendMessage("Bossbar preset '${args[1]}' announced to all players. ID: $id")
+                    } else {
+                        sender.sendMessage("Unknown bossbar preset '${args[1]}'. Check bossbar.yml and use /$label reload.")
+                    }
                 }
             }
+            "stop" -> stop(sender, label, args)
             else -> {
                 sender.sendMessage("Usage: /$label bossbar custom <target> <duration> <colour> <content>")
                 sender.sendMessage("Usage: /$label bossbar preset <key>")
+                sender.sendMessage("Usage: /$label bossbar stop <all|id>")
             }
         }
         return true
@@ -68,17 +73,41 @@ class BossBarCommand(private val plugin: ZAutoBroadcast) : CommandExecutor, TabC
             return
         }
 
-        plugin.bossBarManager.announce(BossBarDefinition(title, duration, colour), target?.uniqueId)
+        val id = plugin.bossBarManager.announce(BossBarDefinition(title, duration, colour), target?.uniqueId)
+        if (id == null) {
+            sender.sendMessage("Bossbars are unavailable while the plugin is shutting down.")
+            return
+        }
         val audience = if (allPlayers) "all players" else target!!.name
         val lifetime = if (duration == -1L) "until server shutdown" else "for $duration seconds"
-        sender.sendMessage("Bossbar announced to $audience $lifetime.")
+        sender.sendMessage("Bossbar announced to $audience $lifetime. ID: $id")
+    }
+
+    private fun stop(sender: CommandSender, label: String, args: Array<String>) {
+        if (args.size != 2) {
+            sender.sendMessage("Usage: /$label bossbar stop <all|id>")
+            sender.sendMessage("Use a preset key or an announcement's UUID. Tab completion lists active IDs.")
+            return
+        }
+
+        if (args[1].equals("all", ignoreCase = true)) {
+            val count = plugin.bossBarManager.stopAll()
+            sender.sendMessage(if (count == 0) "There are no active bossbars to stop." else "Stopped all active bossbars ($count).")
+        } else {
+            val count = plugin.bossBarManager.stop(args[1])
+            sender.sendMessage(
+                if (count == 0) "No active bossbar matches '${args[1]}'."
+                else "Stopped $count active bossbar(s) matching '${args[1]}'."
+            )
+        }
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): MutableList<String> {
         if (!sender.hasPermission(ZAutoBroadcast.ADMIN_PERMISSION)) return mutableListOf()
         val suggestions = when {
-            args.size == 1 -> listOf("custom", "preset")
+            args.size == 1 -> listOf("custom", "preset", "stop")
             args.size == 2 && args[0].equals("preset", ignoreCase = true) -> plugin.bossBarManager.presetKeys()
+            args.size == 2 && args[0].equals("stop", ignoreCase = true) -> listOf("all") + plugin.bossBarManager.activeIds()
             args.size == 2 && args[0].equals("custom", ignoreCase = true) ->
                 listOf("all", "@a") + plugin.server.onlinePlayers.map { it.name }
             args.size == 3 && args[0].equals("custom", ignoreCase = true) -> listOf("60", "600", "10800", "-1")
