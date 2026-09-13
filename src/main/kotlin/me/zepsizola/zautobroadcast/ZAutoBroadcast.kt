@@ -5,6 +5,7 @@ import com.tcoded.folialib.FoliaLib
 import com.tcoded.folialib.wrapper.task.WrappedTask
 import io.github.miniplaceholders.api.MiniPlaceholders
 import me.clip.placeholderapi.PlaceholderAPI
+import me.zepsizola.zautobroadcast.bossbar.BossBarManager
 import me.zepsizola.zautobroadcast.command.MainCommand
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver.resolver
@@ -35,6 +36,8 @@ class ZAutoBroadcast : JavaPlugin() {
     }
 
     internal val foliaLib = FoliaLib(this)
+    internal lateinit var bossBarManager: BossBarManager
+        private set
 
     override fun onEnable() {
         logger.info("ZAutoBroadcast has begun enabling.")
@@ -42,6 +45,9 @@ class ZAutoBroadcast : JavaPlugin() {
         setupBStats()
         setupMiniPlaceholders()
         setupPAPI()
+
+        bossBarManager = BossBarManager(this)
+        server.pluginManager.registerEvents(bossBarManager, this)
 
         val mainCommand = MainCommand(this)
         getCommand("zab")?.setExecutor(mainCommand)
@@ -51,6 +57,7 @@ class ZAutoBroadcast : JavaPlugin() {
         forcedBroadcasts = ConcurrentHashMap()
 
         reloadConfigs(true) // Reloads the broadcasts/interval and also initialises the broadcast schedule with new interval
+        bossBarManager.start()
 
         logger.info("ZAutoBroadcast has finished enabling.")
     }
@@ -58,6 +65,7 @@ class ZAutoBroadcast : JavaPlugin() {
     override fun onDisable() {
         logger.info("ZAutoBroadcast disabling...")
         broadcastTask?.cancel() // Cancels broadcasts.
+        if (::bossBarManager.isInitialized) bossBarManager.shutdown()
         logger.info("ZAutoBroadcast has finished disabling.")
     }
 
@@ -166,6 +174,7 @@ class ZAutoBroadcast : JavaPlugin() {
         if (!configFile.exists()) saveResource("config.yml", false)
         val config = YamlConfiguration.loadConfiguration(configFile)
         interval = config.getLong("interval", 300) // Convert to ticks
+        bossBarManager.reloadPresets()
         startBroadcastTask()
     }
 

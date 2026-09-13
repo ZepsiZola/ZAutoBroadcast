@@ -13,7 +13,7 @@ commands:
     aliases: [zautobroadcast, autobroadcast]
     subcommands:
       reload:
-        description: Reloads the broadcasts.yml file.
+        description: Reloads config.yml, broadcasts.yml, and bossbar.yml.
         usage: /<command> reload
       broadcast:
         description: Broadcasts a message with the given key.
@@ -24,3 +24,6 @@ commands:
       custom:
         description: Sends a custom broadcast message.
         usage: /<command> custom <text>
+      bossbar:
+        description: Announces a custom bossbar or a preset from bossbar.yml.
+        usage: /<command> bossbar custom <target> <duration> <colour> <content> OR /<command> bossbar preset <key>
